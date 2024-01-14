@@ -1,9 +1,17 @@
 from __future__ import unicode_literals
 from grammar_be.num2t4be import vars
-from grammar_be.num2t4be import num2text_ordinal
-from ru_number_to_text.num2t4ru import num2text
+from grammar_be.num2t4be import num2text_ordinal, num2text_numerical
+# from ru_number_to_text.num2t4ru import num2text
 
 from libreoffice_snippets import dev # remove before deployment
+
+strFuncDescription=(
+  u'\nСкланенне колькасных і парадкавых лічэбнікаў.\n'
+  u'\ntag="<род><скланненне><лік>", options="<options>"\n'
+  u'\nрод: "M" - мужчынскі, "F" - жаночы, "N" - ніякі, "P" - адсутны;\n'
+  u'case (склон): "N" - Назоўны,"G" - Родны, "D" - Давальны, "A" - Вінавальны, "I" - Творны, "L" - Месны;\n'
+  u'number (лік): "S" - адзіночны, "P" - множны;\n'
+  u'options: "anim" - адуш., "inanim" - неадуш.\n')
 
 def getModel():
   """
@@ -47,11 +55,11 @@ def ReplaceNumberToText():
        answer = answer.lower()
        if answer == 'yes' or answer == 'y':
          num_type = input('Changer number to numerical (0) or ordinal (1)? (default=0) \n') or '0'
+         strTag=input(strFuncDescription + 'Input tag (default="MNS"): ') or 'MNS'
          if int(num_type) == 1:
-           strTag=input('Input tag (examples: "MGS","PGP"; default="MNS"): ') or 'MNS'
            newString = num2text_ordinal(num,tag=strTag)
          else:
-            newString = num2text(num)
+            newString = num2text_numerical(num,tag=strTag)
          print(newString)
          oFound.setString(newString)
 
