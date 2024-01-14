@@ -28,6 +28,7 @@ def getModel():
 def ReplaceNumberToText():
     model = getModel()
     search = model.createSearchDescriptor()
+
     # dev.printObjectProperties(search) # explore the object
     search.setPropertyValue('SearchRegularExpression', True)
 
@@ -36,14 +37,17 @@ def ReplaceNumberToText():
     text = model.Text
     # dev.printObjectProperties(text) # explore the object
 
-    # create an XTextRange at the start of the document
-    tRange = text.Start
-
     # the writer controller impl supports the css.view.XSelectionSupplier interface
     xSelectionSupplier = model.getCurrentController()
 
-    oFound  = model.findNext(tRange, search)
+    cursor = xSelectionSupplier.getViewCursor()
+    # cursorPos = cursor.getPosition()
+    # text.createTextCursorByRange(cursorPos)
 
+    # create an XTextRange at the start of the document
+    # tRange = text.Start
+    tRange = cursor
+    oFound  = model.findNext(tRange, search)
     while oFound:
        print(oFound.getString())
        num = int(oFound.getString())
