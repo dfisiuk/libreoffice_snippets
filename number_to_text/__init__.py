@@ -13,6 +13,18 @@ strFuncDescription=(
   u'number (лік): "S" - адзіночны, "P" - множны;\n'
   u'options: "anim" - адуш., "inanim" - неадуш.\n')
 
+patterns = (
+   (u'\d{1,}-х',1,u'PGP'), #'90-x'
+   (u'\d{1,}-я',1,u'PNP'), #'60-я'
+   (u'\d{1,}-мі',1,u'PIP'), #'70-мі'
+   (u'\d{1,}-га',1,u'MGS'),  #  66-га
+   (u'([уў]\s)(\d{1,})(\sгодзе)',1,u'MLS'), # у 1994 годзе
+   (u'()(\d{1,})(\sгода)',1,u'MGS'), # 1965 года
+   (u'(з\s)(\d{4})',1,u'MGS'), # з 1976
+   (u'(па\s)(\d{4})',1,u'MNS'), # па 1982
+   (u'\d{1,}-\w{3,}',0,None), # '24-гадзіннага'
+   ('\d{1,}',None,None)
+)
 def getModel():
   """
   just before deployment we can change this to
@@ -31,43 +43,50 @@ def ReplaceNumberToText():
 
     # dev.printObjectProperties(search) # explore the object
     search.setPropertyValue('SearchRegularExpression', True)
+    # \d{1,}-х, PGP
+    # (\d{1,})
+    # search.setSearchString('(\d{1,})') # search numbers
+    for expr in patterns:
+      search.setSearchString(expr)
+      # get the XText interface
+      text = model.Text
+      # dev.printObjectProperties(text) # explore the object
 
-    search.setSearchString('(\d{1,})') # search numbers
-    # get the XText interface
-    text = model.Text
-    # dev.printObjectProperties(text) # explore the object
+      # the writer controller impl supports the css.view.XSelectionSupplier interface
+      xSelectionSupplier = model.getCurrentController()
 
-    # the writer controller impl supports the css.view.XSelectionSupplier interface
-    xSelectionSupplier = model.getCurrentController()
+      cursor = xSelectionSupplier.getViewCursor()
+      # cursorPos = cursor.getPosition()
+      # text.createTextCursorByRange(cursorPos)
 
-    cursor = xSelectionSupplier.getViewCursor()
-    # cursorPos = cursor.getPosition()
-    # text.createTextCursorByRange(cursorPos)
+      # create an XTextRange at the start of the document
+      # tRange = text.Start
+      tRange = cursor
+      oFound  = model.findNext(tRange, search)
+      while oFound:
+        xText = oFound.getText()
+        xWordCursor = xText.createTextCursorByRange(oFound)
+        xSelectionSupplier.select(xWordCursor)
 
-    # create an XTextRange at the start of the document
-    # tRange = text.Start
-    tRange = cursor
-    oFound  = model.findNext(tRange, search)
-    while oFound:
-       print(oFound.getString())
-       num = int(oFound.getString())
+        print(oFound.getString())
+        answer = input('Replace number to text? ("Yes/No" or "Y/N", default="No") \n') or 'No'
+        answer = answer.lower()
+        if answer == 'yes' or answer == 'y':
 
-       xText = oFound.getText()
-       xWordCursor = xText.createTextCursorByRange(oFound)
-       xSelectionSupplier.select(xWordCursor)
-       answer = input('Replace number to text? ("Yes/No" or "Y/N", default="No") \n') or 'No'
-       answer = answer.lower()
-       if answer == 'yes' or answer == 'y':
-         num_type = input('Changer number to numerical (0) or ordinal (1)? (default=0) \n') or '0'
-         strTag=input(strFuncDescription + 'Input tag (default="MNS"): ') or 'MNS'
-         if int(num_type) == 1:
-           newString = num2text_ordinal(num,tag=strTag)
-         else:
-            newString = num2text_numerical(num,tag=strTag)
-         print(newString)
-         oFound.setString(newString)
+          num_type = expr[1]
+          strTag  = expr[2]
+          num = int(oFound.getString())
 
-       oFound  = model.findNext(oFound.End, search)
+          num_type = input('Changer number to numerical (0) or ordinal (1)? (default=0) \n') or '0'
+          strTag=input(strFuncDescription + 'Input tag (default="MNS"): ') or 'MNS'
+          if int(num_type) == 1:
+            newString = num2text_ordinal(num,tag=strTag)
+          else:
+             newString = num2text_numerical(num,tag=strTag)
+          print(newString)
+          oFound.setString(newString)
+
+        oFound  = model.findNext(oFound.End, search)
 
 if __name__ == '__main__':
   ReplaceNumberToText()
