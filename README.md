@@ -2,11 +2,10 @@
 from ru_number_to_text.num2t4be import num2text_ordinal, num2text_numerical
 
 ```bash
+/Applications/LibreOffice.app/Contents/MacOS/soffice --accept="socket,host=localhost,port=2002;urp"
 PYTHONPATH=. /Applications/LibreOffice.app/Contents/Resources/python
->>> import os
->>> os.chdir('/home/user/myprojects')
->>> os.getcwd()
-'/home/user/myprojects'
+```
+```python
 >>> from libreoffice_snippets.number_to_text import ReplaceNumberToText
 >>> ReplaceNumberToText()
 ```
