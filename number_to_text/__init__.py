@@ -16,16 +16,16 @@ strFuncDescription=(
   u'options: "anim" - адуш., "inanim" - неадуш.\n')
 
 patterns = (
-   (u'()(\d+)-х()',1,u'PGP',None), #'90-x'
-   (u'()(\d+)-я()',1,u'PNP',None), #'60-я'
-   (u'()(\d+)-мі()',1,u'PIP',None), #'70-мі'
-   (u'()(\d+)-га()',1,u'MGS',None),  #  66-га
-   (u'([Ууў]\s)(\d+)(\sгодзе)',1,u'MLS',None), # у 1994 годзе
-   (u'()(\d+)(\sгода)',1,u'MGS',None), # 1965 года
-   (u'([Зз]\s)(\d{4})()',1,u'MGS',None), # з 1976
-   (u'([Пп]а\s)(\d{4})()',1,u'MNS',None), # па 1982
-   (u'()(\d+)-(\w{3,})',0,None,True), # '24-гадзіннага'
-   ('()(\d+)()',None,None,None)
+  #  (u'()(\d+)-х()',1,u'PGP',None), #'90-x'
+  #  (u'()(\d+)-я()',1,u'PNP',None), #'60-я'
+  #  (u'()(\d+)-мі()',1,u'PIP',None), #'70-мі'
+  #  (u'()(\d+)-га()',1,u'MGS',None),  #  66-га
+  #  (u'([Ууў]\s)(\d+)(\sгодзе)',1,u'MLS',None), # у 1994 годзе
+  #  (u'()(\d+)(\sгода)',1,u'MGS',None), # 1965 года
+  #  (u'([Зз]\s)(\d{4})()',1,u'MGS',None), # з 1976
+  #  (u'([Пп]а\s)(\d{4})()',1,u'MNS',None), # па 1982
+  #  (u'()(\d+)-(\w{3,})',0,None,True), # '24-гадзіннага'
+   ('()(\d+)()',None,None,None),
 )
 def getModel():
   """
@@ -34,7 +34,7 @@ def getModel():
   """
   return dev.getModel() # via socket
 
-def ReplaceNumberToText():
+def ReplaceNumberToText(StartFromBegining=True):
     model = getModel()
     search = model.createSearchDescriptor()
 
@@ -55,9 +55,16 @@ def ReplaceNumberToText():
       # cursorPos = cursor.getPosition()
       # text.createTextCursorByRange(cursorPos)
 
+      if StartFromBegining:
+        # create an XTextRange at the start of the document
+        tRange = text.Start
+      else:
+        # create an XTextRange at the start of the current cursor
+        tRange = cursor
+
       # create an XTextRange at the start of the document
       tRange = text.Start
-      # tRange = cursor
+
       oFound  = model.findNext(tRange, search)
       while oFound:
         xText = oFound.getText()
