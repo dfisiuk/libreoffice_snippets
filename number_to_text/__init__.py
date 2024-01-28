@@ -5,6 +5,8 @@ from grammar_be.num2t4be import num2text_ordinal, num2text_numerical
 
 from libreoffice_snippets import dev # remove before deployment
 
+import re
+
 strFuncDescription=(
   u'\nСкланенне колькасных і парадкавых лічэбнікаў.\n'
   u'\ntag="<род><скланненне><лік>", options="<options>"\n'
@@ -14,16 +16,16 @@ strFuncDescription=(
   u'options: "anim" - адуш., "inanim" - неадуш.\n')
 
 patterns = (
-   (u'\d{1,}-х',1,u'PGP'), #'90-x'
-   (u'\d{1,}-я',1,u'PNP'), #'60-я'
-   (u'\d{1,}-мі',1,u'PIP'), #'70-мі'
-   (u'\d{1,}-га',1,u'MGS'),  #  66-га
-   (u'([уў]\s)(\d{1,})(\sгодзе)',1,u'MLS'), # у 1994 годзе
-   (u'()(\d{1,})(\sгода)',1,u'MGS'), # 1965 года
-   (u'(з\s)(\d{4})',1,u'MGS'), # з 1976
-   (u'(па\s)(\d{4})',1,u'MNS'), # па 1982
-   (u'\d{1,}-\w{3,}',0,None), # '24-гадзіннага'
-   ('\d{1,}',None,None)
+   (u'()(\d+)-х()',1,u'PGP',None), #'90-x'
+   (u'()(\d+)-я()',1,u'PNP',None), #'60-я'
+   (u'()(\d+)-мі()',1,u'PIP',None), #'70-мі'
+   (u'()(\d+)-га()',1,u'MGS',None),  #  66-га
+   (u'([Ууў]\s)(\d+)(\sгодзе)',1,u'MLS',None), # у 1994 годзе
+   (u'()(\d+)(\sгода)',1,u'MGS',None), # 1965 года
+   (u'([Зз]\s)(\d{4})()',1,u'MGS',None), # з 1976
+   (u'([Пп]а\s)(\d{4})()',1,u'MNS',None), # па 1982
+   (u'()(\d+)-(\w{3,})',0,None,True), # '24-гадзіннага'
+   ('()(\d+)()',None,None,None)
 )
 def getModel():
   """
@@ -32,22 +34,16 @@ def getModel():
   """
   return dev.getModel() # via socket
 
-# search patterns:
-# '\d{1,}' - 50, 345
-# '\d{1,}-[ях]' - 1980-я, 1990-х
-# '\d{1,}-\w+' - 23-метровай (складаныя словы, першай (або апошняй) часткай якіх з’яўляецца лічба любога злічэння)
-
 def ReplaceNumberToText():
     model = getModel()
     search = model.createSearchDescriptor()
 
     # dev.printObjectProperties(search) # explore the object
     search.setPropertyValue('SearchRegularExpression', True)
-    # \d{1,}-х, PGP
-    # (\d{1,})
-    # search.setSearchString('(\d{1,})') # search numbers
+
     for expr in patterns:
-      search.setSearchString(expr)
+      print('expr: ' + expr[0])
+      search.setSearchString(expr[0])
       # get the XText interface
       text = model.Text
       # dev.printObjectProperties(text) # explore the object
@@ -60,31 +56,41 @@ def ReplaceNumberToText():
       # text.createTextCursorByRange(cursorPos)
 
       # create an XTextRange at the start of the document
-      # tRange = text.Start
-      tRange = cursor
+      tRange = text.Start
+      # tRange = cursor
       oFound  = model.findNext(tRange, search)
       while oFound:
         xText = oFound.getText()
         xWordCursor = xText.createTextCursorByRange(oFound)
         xSelectionSupplier.select(xWordCursor)
 
-        print(oFound.getString())
-        answer = input('Replace number to text? ("Yes/No" or "Y/N", default="No") \n') or 'No'
+        num_type = expr[1]
+        strTag  = expr[2]
+        found_str = oFound.getString()
+
+        print('found string: ' + found_str, 'expr: ' + expr[0])
+
+        answer = input('Replace number to text? ("Yes/No" or "Y/N", default="Yes") \n') or 'Yes'
         answer = answer.lower()
         if answer == 'yes' or answer == 'y':
+          if not num_type:
+            num_type = input('Changer number to numerical (0) or ordinal (1)? (default=0) \n') or '0'
+          if not strTag:
+            strTag=input(strFuncDescription + 'Input tag (default="MNS"): ') or 'MNS'
 
-          num_type = expr[1]
-          strTag  = expr[2]
-          num = int(oFound.getString())
+          m = re.search(expr[0], found_str)
+          num = int(m.group(2))
 
-          num_type = input('Changer number to numerical (0) or ordinal (1)? (default=0) \n') or '0'
-          strTag=input(strFuncDescription + 'Input tag (default="MNS"): ') or 'MNS'
+          print('Number: ' + str(num), 'num_type: '+ str(num_type), 'Tag: ' + strTag)
+
           if int(num_type) == 1:
             newString = num2text_ordinal(num,tag=strTag)
           else:
              newString = num2text_numerical(num,tag=strTag)
+          if expr[3] == True:
+            newString = ''.join(newString.split(' '))
           print(newString)
-          oFound.setString(newString)
+          oFound.setString(m.group(1) + newString + m.group(3))
 
         oFound  = model.findNext(oFound.End, search)
 
