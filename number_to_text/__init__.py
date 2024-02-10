@@ -58,10 +58,8 @@ def ReplaceNumberToText(StartFromBegining=True):
       if StartFromBegining:
         # create an XTextRange at the start of the document
         tRange = text.Start
-        print("StartFromBegining 1: "+str(StartFromBegining))
       else:
-        # create an XTextRange at the start of the current cursor
-        print("StartFromBegining 2: "+str(StartFromBegining))
+        # create an XTextRange at the current cursor
         tRange = cursor
 
       oFound  = model.findNext(tRange, search)
