@@ -8,12 +8,12 @@ from libreoffice_snippets import dev # remove before deployment
 import re
 
 strFuncDescription=(
-  u'\nСкланенне колькасных і парадкавых лічэбнікаў.\n'
-  u'\ntag="<род><скланненне><лік>", options="<options>"\n'
-  u'\nрод: "M" - мужчынскі, "F" - жаночы, "N" - ніякі, "P" - адсутны;\n'
-  u'case (склон): "N" - Назоўны,"G" - Родны, "D" - Давальны, "A" - Вінавальны, "I" - Творны, "L" - Месны;\n'
-  u'number (лік): "S" - адзіночны, "P" - множны;\n'
-  u'options: "anim" - адуш., "inanim" - неадуш.\n')
+  '\nСкланенне колькасных і парадкавых лічэбнікаў.\n'
+  '\ntag="<род><скланненне><лік>", options="<options>"\n'
+  '\nрод: "M" - мужчынскі, "F" - жаночы, "N" - ніякі, "P" - адсутны;\n'
+  'case (склон): "N" - Назоўны,"G" - Родны, "D" - Давальны, "A" - Вінавальны, "I" - Творны, "L" - Месны;\n'
+  'number (лік): "S" - адзіночны, "P" - множны;\n'
+  'options: "anim" - адуш., "inanim" - неадуш.\n')
 
 patterns = (
   #  (u'()(\d+)-х()',1,u'PGP',None), #'90-x'
@@ -58,12 +58,11 @@ def ReplaceNumberToText(StartFromBegining=True):
       if StartFromBegining:
         # create an XTextRange at the start of the document
         tRange = text.Start
+        print("StartFromBegining 1: "+str(StartFromBegining))
       else:
         # create an XTextRange at the start of the current cursor
+        print("StartFromBegining 2: "+str(StartFromBegining))
         tRange = cursor
-
-      # create an XTextRange at the start of the document
-      tRange = text.Start
 
       oFound  = model.findNext(tRange, search)
       while oFound:
