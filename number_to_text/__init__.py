@@ -16,15 +16,18 @@ strFuncDescription=(
   'options: "anim" - адуш., "inanim" - неадуш.\n')
 
 patterns = (
-  #  (u'()(\d+)-х()',1,u'PGP',None), #'90-x'
-  #  (u'()(\d+)-я()',1,u'PNP',None), #'60-я'
-  #  (u'()(\d+)-мі()',1,u'PIP',None), #'70-мі'
-  #  (u'()(\d+)-га()',1,u'MGS',None),  #  66-га
-  #  (u'([Ууў]\s)(\d+)(\sгодзе)',1,u'MLS',None), # у 1994 годзе
-  #  (u'()(\d+)(\sгода)',1,u'MGS',None), # 1965 года
-  #  (u'([Зз]\s)(\d{4})()',1,u'MGS',None), # з 1976
-  #  (u'([Пп]а\s)(\d{4})()',1,u'MNS',None), # па 1982
-  #  (u'()(\d+)-(\w{3,})',0,None,True), # '24-гадзіннага'
+   (u'()(\d+)-х()',1,u'PGP',None), #'90-x'
+   (u'()(\d+)-я()',1,u'PNP',None), #'60-я'
+   (u'()(\d+)-мі()',1,u'PIP',None), #'70-мі'
+   (u'()(\d+)-га()',1,u'MGS',None),  #  66-га
+   (u'([Ууў]\s)(\d+)(\sгодзе)',1,u'MLS',None), # у 1994 годзе
+   (u'()(\d+)(\sгода)',1,u'MGS',None), # 1965 года
+   (u'([Зз]\s)(\d{4})()',1,u'MGS',None), # з 1976
+   (u'([Пп]а\s)(\d{4})()',1,u'MNS',None), # па 1982
+  # \d{1,4} год[\s\.,!...] # 1949 год
+  # 1954 і 1960 гадоў
+  # у 1954 і 1960 гадах
+   (u'()(\d+)-(\w{3,})',0,None,True), # '24-гадзіннага'
    ('()(\d+)()',None,None,None),
 )
 def getModel():
@@ -90,7 +93,7 @@ def ReplaceNumberToText(StartFromBegining=True):
           if int(num_type) == 1:
             newString = num2text_ordinal(num,tag=strTag)
           else:
-             newString = num2text_numerical(num,tag=strTag)
+             newString = num2text_numerical(num,tag=strTag,reduced=True)
           if expr[3] == True:
             newString = ''.join(newString.split(' '))
           print(newString)
